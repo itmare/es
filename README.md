@@ -1331,100 +1331,33 @@ $ sudo systemctl enable grafana-server
 
 ---
 
-운영에 도움되는 오픈소스
-========================
+운영에 도움되는 오픈소스 툴
+===========================
 
 ---
 
----
+Curator: 다양한 배치작업
+------------------------
+
+<br><br>
+
+elasticdump – 인덱스 데이터 마이그레이션
+----------------------------------------
 
 <br><br>
 
 Telegram
 --------
 
--	tele.py파일
+<br><br>
 
-```python
-#!/usr/bin/python
-# -*- coding: utf-8  -*-
+ansible – 쉽게 배포하고, 쉽게 작업하기
+--------------------------------------
 
-import json
-import urllib3
-from telegram.ext import Updater, MessageHandler, Filters, CommandHandler  # import modules
-import es_mod
+<br><br>
 
-my_token = '000000000:AAAAEFWEFWEFWEFWEF323F23E3E2323R23R'
-print('start telegram chat bot')
-
-def es_command(bot, update) :
-    cmd = update.message.text.split(" ")
-    rtn = es_mod.es(cmd)
-
-    update.message.reply_text(rtn)
-
-updater = Updater(my_token)
-
-es_handler = CommandHandler('es', es_command)
-updater.dispatcher.add_handler(es_handler)
-
-updater.start_polling(timeout=3, clean=True)
-updater.idle()
-```
-
--	es_mod.py파일
-
-```python
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-import sys
-import urllib3
-import json
-
-esUrl = "es_url:9200"
-
-def es(cmd):
-    try:
-        header = { 'Content-Type': 'application/json' }
-        data = {}
-        if cmd[1] == "i":
-            rtn = es_rtn('GET', esUrl, data, header)
-        elif cmd[1] == "h":
-            rtn = es_rtn('GET', esUrl + "/_cat/health?v", data, header)
-        elif cmd[1] == "d":
-            rtn = es_rtn('GET', esUrl + "/_cat/allocation?v", data, header)
-        elif cmd[1] == "re":
-            data = { "transient" : { "cluster.routing.allocation.enable" : "all" } }
-            rtn = es_rtn('PUT', esUrl + "/_cluster/settings", data, header)
-        elif cmd[1] == "rd":
-            data = { "transient" : { "cluster.routing.allocation.enable" : "none" } }
-            rtn = es_rtn('PUT', esUrl + "/_cluster/settings", data, header)
-        else:
-            print "incorrect commands"
-            rtn = "incorrect commands"
-    except IndexError:
-        print "no args"
-        rtn = "no args"
-
-    return rtn
-
-def es_rtn(method, cmd, data=None, header=None):
-    http = urllib3.PoolManager()
-
-    try:
-        rtn = http.request(method,cmd,body=json.dumps(data),headers=header)
-    except urllib3.exceptions.HTTPError as errh:
-        print ("Http Error:",errh)
-
-    print rtn.data
-    return rtn.data
-
-if __name__ == '__main__':
-    es(sys.argv)
-```
-
-.
+telegram
+--------
 
 .
 
