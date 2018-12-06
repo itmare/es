@@ -83,7 +83,8 @@ $ service elasticsearch start
 # 중지
 $ service elasticsearch stop
 # es버전/프로세스 확인
-$ ps -ef | grep ela
+$ rpm -qa | grep elastic #rpm설치 시,
+$ ps -ef | grep elastic
 # app 반응 확인
 $ curl localhost:9200
 ```
@@ -379,7 +380,7 @@ http.port: 9200
 # 클러스터 내에 노드들이 서로 통신 할때 사용할 포트 설정
 # 노드는 서로의 용량이나 샤드상태를 알아야하기 때문에 tcp통신을 해야함
 transport.tcp.port: 9300
-# 마스터 노드로서 role 부여 ()
+# 마스터 노드로서 role 부여
 node.master: true
 node.data: false
 ```
