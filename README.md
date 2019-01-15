@@ -94,7 +94,7 @@ $ curl localhost:9200
 	1.	rpm 설치: /var/log/elasticsearch/elasticsearch.log
 	2.	소스 설치: <path_installed>/logs/elasticsearch.log
 
--	경로
+-	기본 경로
 
 	-	설치파일: /usr/share/elasticsearch/
 	-	conf파일: /etc/elasticsearch/
@@ -182,6 +182,12 @@ GET twitter/_segments
 # index 정보 요약
 GET _cat/indices?v
 GET _cat/indices/twitter?v
+
+# CLI 사용
+curl -XGET -H 'Content-Type: application/json' http://{es_url}:9200/{index}
+
+XGET, XPUT, XDELETE ...
+_stats, _segments, _cat/indices, _cat/indices/{index_name}  ...
 ```
 
 ### document 색인 및 조회
@@ -212,7 +218,7 @@ PUT twitter/_doc/1/_create
 # POST Method 를 통해 document ID 없이 indexing
 POST twitter/_doc
 {
-    "user" : "kimchy",
+    "user" : "there",
     "post_date" : "2009-11-15T14:12:12",
     "message" : "trying out Elasticsearch"
 }
@@ -251,10 +257,30 @@ curl -XDELETE -H 'Content-Type: application/json' http://{ES_URL}:9200/{index}
 
 ---
 
-Plugins
-=======
+Elasticsearch 플러그인
+======================
 
 ---
+
+-	기본 명령어 (설치/제거)
+
+```shell
+cd /usr/share/elasticsearch/
+# with internet
+bin/elasticsearch-plugin install [plugin_name]
+
+# without internet
+bin/elasticsearch-plugin install file:///path/to/plugin.zip
+
+# with url
+bin/elasticsearch-plugin install [url]
+
+# 설치된 플러그인 리스트 확인
+bin/elasticsearch-plugin list
+
+# 제거
+bin/elasticsearch-plugin remove [plugin_name]
+```
 
 -	root계정으로 설치
 
@@ -358,10 +384,10 @@ service elasticsearch restart
 # 제대로 적용되고 데이터 쌓이는지 확인 후, 설정 제거 (path.data, path.logs)
 ```
 
-```
-- 경로 설정 내용 삭제
-- 마스터 노드 이름을 제외한 모든 설정 동일하게 변경
-```
+-	경로 설정 내용 삭제
+-	마스터 노드 이름을 제외한 모든 설정 동일하게 변경
+
+<br>
 
 -	discovery 설정하기
 
@@ -374,18 +400,24 @@ discovery.zen.minimum_master_nodes: 2
 # network.host설정에서 외부의 데이터 호출을 받는 부분만 분리
 network.bind_host: 0.0.0.0
 # 클러스터 내의 다른 노드들과 통신을 하는 부분만 분리
-network.publish_host: master01.com
+network.publish_host: master01.com # 각각 해당 서버의 주소
 # http프로토콜을 통해 es의 API를 전달할때 사용할 포트 설정
 http.port: 9200
 # 클러스터 내에 노드들이 서로 통신 할때 사용할 포트 설정
 # 노드는 서로의 용량이나 샤드상태를 알아야하기 때문에 tcp통신을 해야함
 transport.tcp.port: 9300
+```
+
+-	master node에 추가하기
+
+```shell
 # 마스터 노드로서 role 부여
+node.name: itmare-master01
 node.master: true
 node.data: false
 ```
 
--	Data node 추가하기
+-	Data node에 추가하기
 
 ```shell
 # 데이터 노드에 적절한 노드이름과 다음을 추가 (기존 마스터 노드 설정 추가)
@@ -564,8 +596,9 @@ PUT twitter/_settings
 
 ```shell
 # refresh_interval
-#	segment에 저장된 데이터를 검색할 수 있도록 commit point를 생성하는 주기
-#	reset은 null로 설정
+# index가 refresh될 때 마다 새로운 로그가 발생했으면 그걸 색인한다.
+# segment에 저장된 데이터를 검색할 수 있도록 commit point를 생성하는 주기
+# reset은 null로 설정
 PUT twitter/_settings
 {
 	"index": {
@@ -1328,12 +1361,22 @@ $ sudo systemctl enable grafana-server
 
 -	http://{url}:3000
 
+.
+
+.
+
+.
+
+.
+
+.
+
 <br><br><br><br><br>
 
 ---
 
-운영에 도움되는 오픈소스 툴
-===========================
+오픈소스 툴
+===========
 
 ---
 
@@ -1402,7 +1445,7 @@ max virtual memory areas vm.max_map_count [65530] is too low, increase to at lea
 
 -	실행 시 아래와 같은 메시지가 뜰 경우 vm.max_map_count 값을 262144로 변경
 
-#### **해결:**
+#### **Solution:**
 
 -	sysctl.conf 수정
 
