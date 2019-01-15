@@ -640,9 +640,17 @@ PUT twitter/_settings
 
 -	routing.allocation과 routing.rebalance의 차이점 allocation은 어떻게 unassigned 샤드가 할당되는지, 언제 unassigned 샤드가 노드로 할당을 허락하는지를 설정하고, rebalance는 언제 es가 노드에서 다른 노드로 기존 샤드를 재배치함으로써, 노드 주위 데이터의 균형(샤드 카운트)맞추는 걸 시도한다. rebalance를 disable하면, 새로운 노드가 추가 됐을때 es는 샤드를 움직여 클러스터에 동일한 샤드수를 맞추는데 이걸 막는다. but 이것은 watermark 관련 이벤트 발생시에, 데이터의 이동 또한 막는다.
 
-```shell
-# Mapping
+### Dynamic Mapping
 
+```json
+PUT data1/_doc/1
+{ "count": 5 }
+
+GET data1
+
+PUT data2/_doc/1
+{ "message": "ES Tutorial Dynamic Mapping" }
+GET data2
 ```
 
 ### Template
@@ -655,13 +663,18 @@ PUT _template/mytemplate
 	"order" : 0,
 	"settings":
 	{
-		"number_of_shards": 5
+		"number_of_shards": 3
 	}
 }
 GET _template/mytemplate
 ```
 
 ### hot-warm data node
+
+-	2가지 방법
+	-	`node.attr.box_type: hot` in elasticsearch.yml
+	-	`./bin/elasticsearch -Ecode.attr.box_type=hot`
+	-	box_type attribute는 임의적이고, 원하는데로 변경 가능 (가시성 위해 hot/warm 추천)
 
 ```shell
 sudo vi /etc/elasticsearch.yml
