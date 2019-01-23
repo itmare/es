@@ -674,7 +674,7 @@ GET _template/mytemplate
 -	2가지 방법
 	-	`node.attr.box_type: hot` in elasticsearch.yml
 	-	`./bin/elasticsearch -Ecode.attr.box_type=hot`
-	-	box_type attribute는 임의적이고, 원하는데로 변경 가능 (가시성 위해 hot/warm 추천)
+	-	box_type attribute는 임의적이고, 원하는데로 변경 가능 (가시성 위해 hot/warm 설정)
 
 ```shell
 sudo vi /etc/elasticsearch.yml
@@ -714,7 +714,7 @@ PUT test/_settings
 elasticsearch API 활용
 ----------------------
 
-### Cluster API - 클러스터 운영 API 다루기
+### Cluster API - 클러스터 운영 API 다루기 (\_cluster)
 
 #### 1. 기본 구조
 
@@ -722,10 +722,10 @@ elasticsearch API 활용
 PUT /_cluster/settings
 {
 	"persistent":{
-		# cluster restart 시, 리셋되는 설정
+		# 사용자 변경 없으면 영구적인 설정 (static setting 보다 우선순위 높음)
 	},
 	"transient":{
-		# 사용자 변경 없으면 영구적인 설정 (static setting 보다 우선순위 높음)
+		# cluster restart 시, 리셋되는 설정
 	}
 }
 ```
@@ -756,6 +756,10 @@ PUT _cluster/settings
 		"cluster.routing.allocation.enable":"none"
 	}
 }
+# all (default) - 모든 샤드들에게 할당을 허용
+# none - 샤드가 할당되지 않도록 설정
+# primaries - 프라이머리 샤드만 할당되도록 설정
+# new_primaries - 새롭게 생성되는 인덱스의 프라이머리 샤드만 할당되도록 설정
 ```
 
 ```shell
@@ -770,9 +774,9 @@ PUT _cluster/settings
 	}
 }
 # exclude.{attribute} 종류
-#	- _name : node이름으로 노드 매치
-#	- _ip : hostname과 관련된 ip address와 노드 매치
-#	- _host : hostname으로 노드 매치
+# _name : node이름으로 노드 매치
+# _ip : hostname과 관련된 ip address와 노드 매치
+# _host : hostname으로 노드 매치
 ```
 
 ```shell
@@ -798,6 +802,7 @@ POST _cluster/reroute
 
 ```shell
 # 내부 인덱스 복사
+POST _reindex
 {
 	"source": {
 		"index": "twitter"
@@ -1323,6 +1328,8 @@ ELK 스택으로 활용하기 Elasticsearch 모니터링
 ### \_cat API 활용한 ES 모니터링
 
 ```java
+
+
 ```
 
 ### \_stat API 활용한 ES 모니터링 (influxdb, grafana 활용)
