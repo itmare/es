@@ -927,6 +927,8 @@ Elasticsearch 검색엔진 활용 및 성능 최적화와 모니터링
 
 #### 분석기 변경 방법
 
+-	Analyzer 테스트
+
 ```shell
 
 ## Analysis
@@ -962,24 +964,44 @@ POST _analyze
 # 사용자 정의 analyzer
 PUT myanalyze
 {
-    "settings": {
-        "analysis": {
-            "analyzer": {
-                "my_analyzer" : {
-                    "char_filter": [ "html_strip" ],
-                    "tokenizer": "standard",
-                    "filter": [ "uppercase" ]
-                }
-            }
-        }
-    }
+	"settings": {
+		"analysis": {
+			"analyzer": {
+				"my_analyzer" : {
+					"char_filter": [ "html_strip" ],
+					"tokenizer": "standard",
+					"filter": [ "uppercase" ]
+				}
+			}
+		}
+	}
 }
 
 # 설정한 analyzer를 활용, API 테스트
 POST myanalyze/_analyze
 {
-  "analyzer": "my_analyzer",
-  "text": "<b>Winter is coming!!!</b>"
+	"analyzer": "my_analyzer",
+	"text": "<b>Winter is coming!!!</b>"
+}
+
+# 토크나이저만 변경
+PUT myanalyze1
+{
+	"settings": {
+		"analysis": {
+			"analyzer": {
+				"my_analyzer": {
+					"tokenizer": "my_tokenizer"
+				}
+			},
+			"tokenizer": {
+				"my_tokenizer": {
+					"type": "classic",
+					"max_token_length": 5
+				}
+			}
+		}
+	}
 }
 ```
 
@@ -1014,7 +1036,7 @@ PUT bank/_settings
 	"index.max_result_window": 10001
 }
 
-// 정렬
+// 정렬: 오름차순(asc), 내림차순(desc)
 GET bank/_search
 {
     "sort": {
@@ -1296,25 +1318,499 @@ GET bank/_search
 Elasticsearch 색인 성능 최적화
 ------------------------------
 
+### static mapping
+
+#### 1. text field type
+
+```shell
+# template
+PUT text_index
+{
+	"mapping": {
+		"_doc": {
+			"properties": {
+				"title": {
+					"type": "text"
+				}
+			}
+		}
+	}
+}
+```
+
+#### 2. keyword field type
+
+```shell
+# template
+PUT keyword_index
+{
+	"mappings": {
+		"_doc": {
+			"properties": {
+				"title": {
+					"type": "keyword"
+				}
+			}
+		}
+	}
+}
+```
+
+#### 3. date field type
+
+```shell
+// template
+PUT date_index
+{
+	"mapping":{
+		"_doc":{
+			"properties":{
+				"date":{
+					"type": "date"
+				}
+			}
+		}
+	}
+}
+```
+
+```json
+PUT date_index/_doc/1
+{ "date": "2019-01-01"}
+
+PUT date_index/_doc/2
+{ "date": "2019-01-01T12:10:30Z"}
+
+PUT date_index/_doc/3
+{ "date": "1546301430000"}
+
+GET date_index/_search
+{
+	"sort":{"date": "asc"}
+}
+```
+
+```json
+PUT date_index_format
+{
+	"mappings": {
+		"_doc": {
+			"properties": {
+				"date": {
+					"type": "date",
+					"format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+				}
+			}
+		}
+	}
+}
+```
+
+#### 4. Numeric field type
+
+```shell
+PUT numeric_index
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "number_of_bytes": {
+          "type": "integer"
+        },
+        "time_in_seconds": {
+          "type": "float"
+        },
+        "price": {
+          "type": "scaled_float",
+          "scaling_factor": 100
+        }
+      }
+    }
+  }
+}
+```
+
+#### 5. object field type
+
+-	매핑을 정의해서 인덱스를 만들 때
+
+```json
+PUT object_index
+{
+	"mappings":{
+		"_doc":{
+			"properties":{
+				"region":{
+					"type":"keyword"
+				},
+				"manager":{
+					"properties":{
+						"age":{"type":"integer"},
+						"name":{
+							"properties":{
+								"first":{"type":"keyword"},
+								"last":{"type":"keyword"}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+-	매핑 타입을 추가할 때
+
+```json
+PUT object_index/_mapping/_doc
+{
+	"properties":{
+		"region":{
+			"type":"keyword"
+		},
+		"manager":{
+			"properties":{
+				"age":{"type":"integer"},
+				"name":{
+					"properties":{
+						"first":{"type":"keyword"},
+						"last":{"type":"keyword"},
+						"full":{"type":"text"}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+-	object type indexing
+
+```json
+PUT object_index/_doc/1
+{
+	"region":"US",
+	"manager":{
+		"age": 30,
+		"name":{
+			"first":"John",
+			"last":"Smith",
+			"full":"Smith John"
+		}
+	}
+}
+```
+
+-	object type searching
+
+```json
+GET object_index/_search
+{
+	"query":{
+		"match":{
+			"manager.name.first":{
+				"query":"John"
+			}
+		}
+	}
+}
+```
+
+#### 6. nested field type
+
+```shell
+# template
+PUT nested_index
+{
+	"mappings":{
+		"_doc":{
+			"properties":{
+				"user":{
+					"type":"nested"
+				}
+			}
+		}
+	}
+}
+```
+
+```json
+PUT nested_index/_doc/1
+{
+	"user":[
+		{
+			"first":"John",
+			"last":"Smith"
+		},
+		{
+			"first":"Steve",
+			"last":"Jordan"
+		}
+	]
+}
+```
+
+-	nested필드는 nested query로 검색
+
+```json
+GET nested_index/_search
+{
+	"query":{
+		"nested":{
+			"path":"user",
+			"query":{
+				"bool":{
+					"must":[
+						{"match":{"user.first":"John"}},
+						{"match":{"user.last":"Smith"}}
+					]
+				}
+			}
+		}
+	}
+}
+```
+
+<br><br>
+
+### \_all field
+
+-	굳이 니즈가 있다면, copy_to 기능 권고
+
+```shell
+# 생성
+PUT copy_index
+{
+	"mappings":{
+		"_doc":{
+			"properties":{
+				"first_name":{"type":"text","copy_to":"full_name"},
+				"last_name":{"type":"text","copy_to":"full_name"},
+				"full_name":{"type":"text"}
+			}
+		}
+	}
+}
+# 도큐먼트 추가
+POST copy_index/_doc
+{
+	"first_name":"John",
+	"last_name":"Smith"
+}
+# 도큐먼트 확인
+GET copy_index/_search
+{
+	"query":{
+		"match":{
+			"full_name":"John Smith"
+		}
+	}
+}
+```
+
+<br><br>
+
+### refresh_interval
+
+```shell
+# template
+PUT twitter/_settings
+{
+	"index":{
+		"refresh_interval": -1 #==> VALUE
+	}
+}
+# VALUE  
+# "1s": 1초 후 저장
+# -1: disable
+# null: 초기
+
+PUT twitter/_doc/1?refresh=true
+{"msg":"first doc"}
+
+
+```
+
 <br><br>
 
 Elasticsearch 검색 성능 최적화
 ------------------------------
 
-### \_forcemerge API
+### 쿼리 튜닝 하기: 검색에 유리한 튜닝방법
+
+-	multi field로 검색을 해야할 때 가능한 적은 필드로 검색
+-	copy_to를 이용하면 두개의 필드를 하나로 줄여 검색 가능
 
 ```shell
+PUT myindex
+{
+	"mapping":{
+		"_doc":{
+			"properties":{
+				"first_name":{"type":"text", "copy_to": "full_name"},
+				"last_name": { "type": "text", "copy_to": "full_name" },
+				"full_name": { "type": "text" }
+			}
+		}
+	}
+}
+
+## ==> _all  대신 사용과 동일
+```
+
+-	numeric field에 대해 keyword field로 인덱싱 고려
+
+```java
+PUT nonum
+{
+	"mappings":{
+		"_doc":{
+			"properties":{
+				"account_no":{"type":"keyword"}
+			}
+		}
+	}
+}
+
+POST nonum/_doc
+{
+	"account_no":"12345"
+}
+POST nonum/_doc
+{
+	"account_no":"22345"
+}
+```
+
+-	검색이나 range 쿼리는 가능
+
+```java
+GET nonum/_search
+{ "query": { "term": { "account_no": "12345" } } }
+
+GET nonum/_search
+{ "query": { "range": { "account_no": { "gte": 12300 } } } }
+```
+
+-	집계 등의 수치 계산은 불가능
+
+```java
+POST nonum/_search?size=0
+{
+	"query":{
+		"constant_score":{
+			"filter":{
+				"match_all":{}
+			}			
+		}
+	},
+	"aggs":{
+		"hat_prices":{"sum":{"field":"account_no"}}
+	}
+}
+```
+
+-	wildcard의 사용은 자제
+
+```java
+GET bank/_search
+{
+	"query":{"query_string":{"query":"Flee*"}}
+}
+
+GET bank/_search
+{
+	"query":{"match":{"address":"Fleet"}}
+}
+```
+
+-	exact match 검색을 할 땐 match 대신 term 쿼리를 사용
+
+```java
+PUT test1
+{
+	"mappings":{"_doc":{"properties":{"gender":{"type":"keyword"}}}}
+}
+
+POST test1/_doc
+{
+	"gender":"F"
+}
+
+GET test1/_search
+{
+	"query":{"match": {"gender": {"query": "F" }}}
+}
+
+GET test1/_search
+{
+	"query":{"term": {"gender": {"value": "F" }}}
+}
+```
+
+-	filter context는 필터절 내부로 보냄
+
+```java
+//  xxx
+GET bank/_search
+{
+	"query":{
+		"bool":{ "must": [ { "term": { "gender.keyword": "F"} } ] }
+	}
+}
+// ooo
+GET bank/_search
+{
+	"query":{
+		"bool":{ "filter": [ { "term": { "gender.keyword": "F"} } ] }
+	}
+}
+```
+
+-	bool 쿼리는 범위를 좁히면서 검색
+
+```java
+// xxx
+GET bank/_search
+{
+	"query": {"bool": {
+		"must": [ {"match": {"state": {"query": "MI" }}}],
+		"filter": [ {"range": { "age": {"lte": "30" }}}]
+	}}
+}
+// ooo
+GET bank/_search
+{
+	"query": {"bool": {
+		"filter": [ {"range": {"age": {"lte": "30" }}}],
+		"must": [ {"match": {"state": {"query": "MI" }}}]
+	}}
+}
+```
+
+<br><br>
+
+### 샤드 배치 결정하기: 검색 성능을 위해 샤드 배치를 결정하는 노하우
+
+<br><br>
+
+### 그밖의 검색 성능 최적화를 위한 것들
+
+#### \_forcemerge API
+
+```java
 # indexing이 끝난 index는 검생성능을 위해 shard들의 segment를 하나로 병합
 POST twitter/_forcemerge?max_num_segments=1
 ```
 
-### Routing
+#### Routing
 
 ```java
 
 ```
 
-### Rollover API
+#### Rollover API
 
 ```java
 
