@@ -5,8 +5,8 @@ import json
 from datetime import datetime
 from influxdb import InfluxDBClient
 
-influxUrl = "ec2-3-16-8-131.us-east-2.compute.amazonaws.com" # influxdb가 설치된 url주소
-esUrl = "ec2-3-16-8-131.us-east-2.compute.amazonaws.com" # es가 설치된 url주소
+influxUrl = "ec2-x-xx-x-xxx.us-east-2.compute.amazonaws.com" # influxdb가 설치된 url주소
+esUrl = "ec2-x-xx-x-xxx.us-east-2.compute.amazonaws.com" # es가 설치된 url주소
 
 def get_ifdb(db, host=influxUrl, port=8086, user='root', passwd='root'):
 	client = InfluxDBClient(host, port, user, passwd, db)
