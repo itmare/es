@@ -734,7 +734,7 @@ PUT /_cluster/settings
 
 ```shell
 # 샤드가 할당되지 못한 이유에 대해 explain사용하여 확인 가능  ===> 많이 사용
-POST _cluster/allocation/explain
+GET _cluster/allocation/explain
 ```
 
 ```shell
@@ -1791,52 +1791,253 @@ GET bank/_search
 
 <br><br>
 
-### 샤드 배치 결정하기: 검색 성능을 위해 샤드 배치를 결정하는 노하우
-
-<br><br>
-
 ### 그밖의 검색 성능 최적화를 위한 것들
 
 #### \_forcemerge API
 
 ```java
-# indexing이 끝난 index는 검생성능을 위해 shard들의 segment를 하나로 병합
+#// indexing이 끝난 index는 검생성능을 위해 shard들의 segment를 하나로 병합
 POST twitter/_forcemerge?max_num_segments=1
 ```
 
 #### Routing
 
-```java
+-	Routing key를 이용한 인덱싱
 
+```java
+POST rindex/_doc?routing=user1
+{
+	"title": "This is document"
+}
+
+POST rindex/_doc?routing=user1
+{
+	"title": "This is a document for korea"
+}
+
+GET rindex/_search?routing=user1
+{
+	"query":	{ "match": {	"title": "korea" } }
+}
 ```
 
 #### Rollover API
 
-```java
+-	Routing 과 같이 알아야할 rollover API
 
+```java
+PUT logs-000001
+{
+	"aliases":{
+		"logs_write":{}
+	}
+}
+
+POST logs_write/_doc
+{
+	"TEST": "TTT1"
+}
+
+POST logs_write/_doc
+{
+	"TEST": "TTT2"
+}
+
+#// 문서가 2개 이상이면 인덱스 새로 생성
+POST logs_write/_rollover
+{
+	"conditions":{
+		"max_age": "7d",
+		"max_docs": 2,
+		"max_size": "5gb"
+	}
+}
+
+POST logs_write/_doc
+{
+	"TEST": "TTT1"
+}
+
+POST logs_write/_doc
+{
+	"TEST": "TTT2"
+}
+#// 인덱스 이름을 지정해서 생성
+POST logs_write/_rollover/my_new_index_name1
+{
+	"conditions":{
+		"max_age":   "7d",
+		"max_docs":  2,
+		"max_size": "5gb"
+	}
+}
+
+POST logs_write/_doc
+{
+	"TEST": "TTT1":
+}
+
+POST logs_write/_doc
+{
+  "TEST": "TTT2"
+}
+#// ?dry_run 으로 모의실행도 가능
+POST logs_write/_rollover/my_new_index_name2?dry_run
+{
+	"conditions": {
+		"max_age":   "7d",
+		"max_docs":  2,
+		"max_size": "5gb"
+	}
+}
 ```
 
-<br><br>
+<br><br><br>
 
 ELK 스택으로 활용하기 Elasticsearch 모니터링
 --------------------------------------------
 
+### rejected, 데이터의 누락이 발생하는 순간
+
+```java
+#// 스래드풀에 대한 개요
+GET _nodes/thread_pool
+
+#// 현재 각 스레드풀의 상태
+GET _nodes/stats/thread_pool
+
+#// curl사용해서 확인 시,
+curl -XGET 'http://host:port/_nodes/thread_pool'
+
+#// 모니터링
+GET _nodes/stats
+
+#// thread pool 정보만 실시간으로 조회
+GET _cat/thread_pool/search?v
+```
+
+```java
+#// elasticsearch.yml 파일에 큐 사이즈 조절 가능
+thread_pool.bulk.queue_size: 10000
+thread_pool.search.queue_size: 10000
+```
+
+<br>
+
 ### \_cat API 활용한 ES 모니터링
 
 ```java
+#// 클러스터에 속한 node들의 상태를 확인할 수 있는 명령
+GET _cat/nodes
 
+#// ?v옵션을 통해 항목의 필드명 확인 가능
+GET _cat/nodes
+	#// heap.percent - 사용중인 heap memory percentage
+	#// ram.percent - 사용중인 memory percentage
+	#// cpu - 사용중인 cpu 리소스 percentage
+	#// load_1m,5m,15m - 사용중인 load average 값
+	#// node.role - 노드의 role (m - master, d - data, i - injest)
+
+#// &h= 옵션을 통해 필요한 항목만 발췌 가능
+GET _cat/nodes?v&h=ip,node.role
+
+#// &s=ip:asc 옵션을 통해 정렬 가능 (역순 desc)
+GET _cat/nodes?v&h=ip,node.role&s=ip:asc
+
+#// &format=json 옵션을 통행 json 포맷으로 변경 가능
+GET _cat/nodes?v&h=ip,node.role&s=ip:asc&format=json
+
+#// 샤드 및 디스크 용량 관련 사항 조회
+GET _cat/allocation?v
+	#// shards - 샤드 갯수
+	#// disk.indices - 인덱스가 사용하고 있는 디스크 용량
+	#// disk.used - 실제 시스템에서 사용된 디스크 용량
+	#// disk.avail - 실제 시스템에서 사용 가능한 디스크 용량
+	#// disk.total - 실제 시스템에서 전체 디스크 용량
+	#// disk.percent - 실제 시스템의 디스크 용량 사용률
+
+#// 샤드 정보 조회
+GET _cat/shards?v
+	#// shard - 샤드 넘버
+	#// prirep - 프라이머리, 리플리카 샤드 여부
+	#// state - 샤드 상태
+	#// docs - 도큐멘트 갯수
+	#// store - 저장된 사이즈
+
+#// 인덱스 별로 조회 가능
+GET _cat/shards/twitter?v
+
+#// 인덱스 정보 조회
+GET _cat/indices?v
+	#// health - 인덱스 헬스 상태 (green, yellow, red)
+	#// status - 인덱스 open 상태 (open, close)
+	#// pri - 프라이머리 샤드 갯수
+	#// rep - 리플리카 샤드 갯수
+	#// docs.count - 도큐멘트 갯수
+	#// docs.deleted - 삭제된 도큐멘트 갯수
+	#// store.size - 리플리카를 포함한 실제 저장된 사이즈
+	#// pri.store.size - 프라이머리 실제 저장된 사이즈
+
+#// 인덱스 별로 조회 가능
+GET _cat/indices/twitter?v
+
+#// 클러스터 헬스체크 상태
+GET _cat/health?v
+	#// status - 클러스터 전체 상태(green, yellow, red)
+	#// node.total - 클러스터에 속해져있는 전체 노드 갯수
+	#// node.data - 데이터노드 role 을 가지는 노드 갯수
+	#// shards - 클러스터에 저장된 전체 샤드 갯수
+	#// pri - 클러스터에 저장된 프라이머리 샤드 갯수
+	#// relo - 현재 재 할당중인 샤드 갯수
+	#// init - 샤드 상태 변경 전 초기화를 거치고 있는 샤드 갯수
+	#// unassign - 할당되지 않은 샤드 갯수
+	#// pending_tasks - 상태가 변경되는 과정에서 지연이 일어나고 있는 task 갯수
+	#// active_shards_percent - 안정적인 상태에서 운영중인 샤드의 percentage
+
+#// 세팅된 템플릿 조회
+GET _cat/tempalates?v
+	#// name - 템플릿 이름
+	#// index_patterns - 템플릿이 적용될 인덱스 패턴
+	#// order - 템플릿 오더 넘버
+	#// version - 템플릿 버전 정보
+```
+
+-	influx.py
+
+```java
 
 ```
 
+<br><br><br>
+
 ### \_stat API 활용한 ES 모니터링 (influxdb, grafana 활용)
 
--	influxDB 설치
+#### influxDB
+
+-	2013년 첫 릴리즈
+-	InfluxDB는 data store를 위해 구글이 만든 key/value database library인 LevelDB를 사용하고 있다. 따라서, 아래와 같은 LevelDB의 특징을 가지고 있다. ([참고1](https://en.wikipedia.org/wiki/LevelDB), [참고2](http://hochul.net/blog/leveldb-%EA%B5%AC%EA%B8%80%EC%9D%B4-%EA%B3%B5%EA%B0%9C%ED%95%9C-%EB%B9%A0%EB%A5%B4%EA%B3%A0-%EA%B0%80%EB%B2%BC%EC%9A%B4-%ED%82%A4%EB%B0%B8%EB%A5%98-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%B2%A0/)\)
+-	기본적으로 데이타를 compression하기 때문에 읽기와 삭제에 다소 느릴 수 있다.
+-	LevelDB와 다르게 SQL-like query language를 지원, group by, join, 또 복수개의 time series(RDBMS에서 테이블이라고 이해)를 merge하는 것도 가능하다.
+-	InfluxDB는 distributed and scale horizontally하게 설계되었다. 따라서, cluster에 새로운 node만 추가하면 쉽게 scale-out 할 수 있다.
+-	Continuous Queries를 지원, 정해준 시간마다 해당 query를 실행해서 그 결과 값을 지정하는 테이블의 특정 칼럼으로 저장하게 해준다. 보통 분석, 통계 데이타를 쌓을 때 스케줄러를 통해 많이 하는 작업(downsampling 같은 작업)인데, InfuxDB는 이런 작업을 Continuous Query 한방으로 해결해준다.
+-	MongoDB 처럼 Schemaless design 이다.
+-	Primary interface로 native HTTP API를 제공하고 Java, Javascript, Ruby, Rails, Python, PHP, Node.js, Go 등 많은 library를 제공한다.
+-	Go로 작성
+-	InfluxDB는 오픈소스, 소스를 다운로드 받아서 쓰실 수 도 있고 아니면, influxdb.org에서 매달 일정 비용을 내고 호스팅 서비스를 받을 수 있다.
+-	Linux & OS X
+-	HTTP API / JSON over UDP
+-	Numeric data and String
+-	Sharding 지원 / Selelctable replication factor
+-	InfluxDB 는 여러모로 시계열 DB 중에 가장 널리 선택받고 사용 중
+
+<br>
+
+#### influxDB 설치
 
 ```shell
 $ sudo yum install -y wget
 $ sudo easy_install pip
 $ sudo pip install urllib3
-
 
 $ wget https://dl.influxdata.com/influxdb/releases/influxdb-1.7.1.x86_64.rpm
 $ sudo yum localinstall -y influxdb-1.7.1.x86_64.rpm
@@ -1851,13 +2052,13 @@ $ sudo systemctl enable influxdb
 
 -	influxDB 실행
 
-```shell
+```
 $ influx -precision rfc3339
 ```
 
 -	DB 생성
 
-```java
+```
 > CREATE DATABASE mdb
 > use mdb
 > show field keys     
@@ -1984,3 +2185,16 @@ max virtual memory areas vm.max_map_count [65530] is too low, increase to at lea
 	```
 
 -	참고 ([링크](https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html)\)
+
+<br><br><br><br>
+
+클라이언트에 빈번하게 EsRejectedExecutionException가 발생할때,
+--------------------------------------------------------------
+
+-	bulk insert되는 속도가 느려지고, 자주 익셉션이 발생하는 경우
+-	bulk queue가 너무 적은 것은 아닌가 의심 필요
+-	thread pool 상태를 봤을 때, `rejected`된 건수가 많이 보일때
+
+<br>
+
+-	버전6.3부터 bulk --> write로 변경됨
