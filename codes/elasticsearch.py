@@ -16,6 +16,7 @@ def es(cmd):
     try:
         header = { 'Content-Type': 'application/json' }
         data = {}
+        # api 추가
         if cmd[1] == "i":
             es_rtn('GET', cmd[2], data, header)
         elif cmd[1] == "n":
