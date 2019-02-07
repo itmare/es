@@ -23,7 +23,7 @@ def my_test(ifdb):
 	point = [{
 		"measurement": 'docs',
                 "tags": {
-                        "type": "ec2",
+                        "type": "ec2", 
                 },
 		"time": local_dt,
 		"fields": {
