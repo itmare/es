@@ -2002,10 +2002,13 @@ GET _cat/tempalates?v
 	#// version - 템플릿 버전 정보
 ```
 
--	influx.py
+-	es.py활용 모니터링 하기
 
 ```java
-
+// 실행 권한 부여
+chmod -x elasticsearch.py
+// 실행: OPTION은 파이썬 코드에 추가 가능, 커스텀 가능
+python elasticsearch.py <OPTION> <ES_HOST:ES_PORT>
 ```
 
 <br><br><br>
