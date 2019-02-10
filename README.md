@@ -2092,7 +2092,11 @@ select * from docs
 -	influxdb에 접속하고 쓰기 위해 influxdb site-package 설치
 
 ```shell
+# 설치
 $ sudo pip install --ignore-install influxdb
+# 확인
+$ sudo pip list
+
 ```
 
 #### grafana 설치
@@ -2114,14 +2118,70 @@ $ sudo systemctl enable grafana-server
 
 ```shell
 # 실행 권한 주기
-chmod +x influxdb.py
+chmod +x infl.py
 
+# docs라는 이름으로 field추가
+./infl.py
 
+# 참고
+# 임포트할 패키지명과 파일명이 같을 경우 어떤걸 임포트할지 결정하는 과정에서 컴파일 에러 발생
+# influxdb site-package가 설치되어있음에도 실행파일이 influxdb.py라면 "ImportError: cannot import name InfluxDBClient"에러가 발생한다.
 ```
 
-.
+-	influxdb에서 확인
 
-.
+```java
+$ influx -precision rfc3339
+...
+> show field keys
+> select * from docs
+```
+
+-	infl.py을 루프로 돌림
+
+```shell
+while(true); do ./infl.py; done
+```
+
+-	시계열db에 es쪽 stat API를 통해서 데이터를 받아서 influxdb로 밀어넣는 상황
+-	재확인
+
+```java
+$ influx -precision rfc3339
+...
+> show field keys
+> select * from docs
+```
+
+-	grafana 사용하기
+
+<br> - data source추가
+
+<img src="./pictures/stat-api-01.png" width="700">
+
+<img src="./pictures/stat-api-02.png" width="700">
+
+-	dashboard 만들기
+
+<img src="./pictures/stat-api-03.png" width="700">
+
+<img src="./pictures/stat-api-04.png" width="700">
+
+<img src="./pictures/stat-api-05.png" width="700">
+
+<img src="./pictures/stat-api-06.png" width="700">
+
+<img src="./pictures/stat-api-07.png" width="700">
+
+<img src="./pictures/stat-api-08.png" width="700">
+
+<img src="./pictures/stat-api-09.png" width="700">
+
+<img src="./pictures/stat-api-10.png" width="700">
+
+<img src="./pictures/stat-api-11.png" width="700">
+
+\.
 
 .
 
