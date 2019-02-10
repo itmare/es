@@ -2157,29 +2157,29 @@ $ influx -precision rfc3339
 
 <br> - data source추가
 
-<img src="./pictures/stat-api-01.png" width="700">
+<img src="./pictures/stat-api-01.png">
 
-<img src="./pictures/stat-api-02.png" width="700">
+<img src="./pictures/stat-api-02.png">
 
 -	dashboard 만들기
 
-<img src="./pictures/stat-api-03.png" width="700">
+<img src="./pictures/stat-api-03.png">
 
-<img src="./pictures/stat-api-04.png" width="700">
+<img src="./pictures/stat-api-04.png">
 
-<img src="./pictures/stat-api-05.png" width="700">
+<img src="./pictures/stat-api-05.png">
 
-<img src="./pictures/stat-api-06.png" width="700">
+<img src="./pictures/stat-api-06.png">
 
-<img src="./pictures/stat-api-07.png" width="700">
+<img src="./pictures/stat-api-07.png">
 
-<img src="./pictures/stat-api-08.png" width="700">
+<img src="./pictures/stat-api-08.png">
 
-<img src="./pictures/stat-api-09.png" width="700">
+<img src="./pictures/stat-api-09.png">
 
-<img src="./pictures/stat-api-10.png" width="700">
+<img src="./pictures/stat-api-10.png">
 
-<img src="./pictures/stat-api-11.png" width="700">
+<img src="./pictures/stat-api-11.png">
 
 \.
 
