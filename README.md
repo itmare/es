@@ -1926,7 +1926,7 @@ thread_pool.search.queue_size: 10000
 
 ### \_cat API 활용한 ES 모니터링
 
-```java
+```shell
 #// 클러스터에 속한 node들의 상태를 확인할 수 있는 명령
 GET _cat/nodes
 
@@ -2002,13 +2002,30 @@ GET _cat/tempalates?v
 	#// version - 템플릿 버전 정보
 ```
 
--	es.py활용 모니터링 하기
+-	elasticsearch.py활용 모니터링 하기
 
-```java
-// 실행 권한 부여
+```shell
+# 모듈 설치
+sudo easy_install pip
+sudo pip install urllib3
+
+# 실행 권한 부여
 chmod -x elasticsearch.py
-// 실행: OPTION은 파이썬 코드에 추가 가능, 커스텀 가능
+
+# 실행: OPTION은 파이썬 코드에 추가 가능, 커스텀 가능
 python elasticsearch.py <OPTION> <ES_HOST:ES_PORT>
+
+
+example)---------------------------------------------------------------------------------------------------
+[jinwookchung@es01 ~] python es.py n es01:9200
+ip          heap.percent ram.percent cpu load_1m load_5m load_15m node.role master name
+10.142.0.12           25          86  13    0.08    0.05     0.05 di        -      itmare-hot02
+10.142.0.7             6          84   1    0.00    0.01     0.05 mi        *      itmare-master02
+10.142.0.6             5          88   3    0.02    0.04     0.05 mi        -      itmare-master01
+10.142.0.13           49          88   2    0.00    0.01     0.05 di        -      itmare-hot03
+10.142.0.11           27          85   9    0.03    0.03     0.05 di        -      itmare-hot01
+
+[jinwookchung@es01 ~]
 ```
 
 <br><br><br>
@@ -2031,26 +2048,29 @@ python elasticsearch.py <OPTION> <ES_HOST:ES_PORT>
 -	HTTP API / JSON over UDP
 -	Numeric data and String
 -	Sharding 지원 / Selelctable replication factor
--	InfluxDB 는 여러모로 시계열 DB 중에 가장 널리 선택받고 사용 중
+-	InfluxDB 는 여러모로 시계열DB(TSDB) 중에 가장 널리 선택받고 사용 중
 
 <br>
 
 #### influxDB 설치
 
-```shell
-$ sudo yum install -y wget
-$ sudo easy_install pip
-$ sudo pip install urllib3
+-	\_stats 지표를 초단위로 저장할 TSDB로 influxdb 활용하기
 
+```shell
+
+# rpm으로 설치
 $ wget https://dl.influxdata.com/influxdb/releases/influxdb-1.7.1.x86_64.rpm
 $ sudo yum localinstall -y influxdb-1.7.1.x86_64.rpm
 
-$ sudo pip install --ignore-install influxdb
+# deb으로 설치
+$ wget https://dl.influxdata.com/influxdb/releases/influxdb_1.7.1_amd64.deb
+$ sudo yum -y install dpkg
+$ sudo dpkg -i influxdb_1.7.1_amd64.deb
 
+
+# influxdb 구동
 $ sudo systemctl start influxdb
 $ sudo systemctl enable influxdb
-
-
 ```
 
 -	influxDB 실행
@@ -2059,16 +2079,25 @@ $ sudo systemctl enable influxdb
 $ influx -precision rfc3339
 ```
 
+-	http://<host>:8086
 -	DB 생성
 
 ```
-> CREATE DATABASE mdb
-> use mdb
-> show field keys     
-> select * from docs
+CREATE DATABASE mdb
+use mdb
+show field keys
+select * from docs
 ```
 
--	grafana 설치
+-	influxdb에 접속하고 쓰기 위해 influxdb site-package 설치
+
+```shell
+$ sudo pip install --ignore-install influxdb
+```
+
+#### grafana 설치
+
+-	\_stat 지표를 visualize하기 위해 grafana 활용하기
 
 ```shell
 # _stat 지표를 visualize 하기 위해 grafana 활용
@@ -2079,7 +2108,16 @@ $ sudo systemctl start grafana-server
 $ sudo systemctl enable grafana-server
 ```
 
--	http://{url}:3000
+-	http://<설치된호스트>:3000
+
+-	influxdb.py 사용한 stat API 활용하기
+
+```shell
+# 실행 권한 주기
+chmod +x influxdb.py
+
+
+```
 
 .
 
