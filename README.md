@@ -1892,7 +1892,7 @@ POST logs_write/_rollover/my_new_index_name2?dry_run
 }
 ```
 
-<br><br><br>
+<br><br><br><br>
 
 ELK 스택으로 활용하기 Elasticsearch 모니터링
 --------------------------------------------
@@ -1922,7 +1922,7 @@ thread_pool.bulk.queue_size: 10000
 thread_pool.search.queue_size: 10000
 ```
 
-<br>
+<br><br><br>
 
 ### \_cat API 활용한 ES 모니터링
 
@@ -2032,7 +2032,7 @@ ip          heap.percent ram.percent cpu load_1m load_5m load_15m node.role mast
 
 ### \_stat API 활용한 ES 모니터링 (influxdb, grafana 활용)
 
-#### influxDB
+#### influxDB에 대해서
 
 -	2013년 첫 릴리즈
 -	InfluxDB는 data store를 위해 구글이 만든 key/value database library인 LevelDB를 사용하고 있다. 따라서, 아래와 같은 LevelDB의 특징을 가지고 있다. ([참고1](https://en.wikipedia.org/wiki/LevelDB), [참고2](http://hochul.net/blog/leveldb-%EA%B5%AC%EA%B8%80%EC%9D%B4-%EA%B3%B5%EA%B0%9C%ED%95%9C-%EB%B9%A0%EB%A5%B4%EA%B3%A0-%EA%B0%80%EB%B2%BC%EC%9A%B4-%ED%82%A4%EB%B0%B8%EB%A5%98-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%B2%A0/)\)
@@ -2140,7 +2140,7 @@ $ influx -precision rfc3339
 -	infl.py을 루프로 돌림
 
 ```shell
-while(true); do ./infl.py; done
+while(true); do ./infl.py; done &
 ```
 
 -	시계열db에 es쪽 stat API를 통해서 데이터를 받아서 influxdb로 밀어넣는 상황
@@ -2181,14 +2181,6 @@ $ influx -precision rfc3339
 
 <img src="./pictures/stat-api-11.png">
 
-\.
-
-.
-
-.
-
-.
-
 <br><br><br><br><br>
 
 ---
@@ -2197,11 +2189,6 @@ $ influx -precision rfc3339
 ===========
 
 ---
-
-Curator: 다양한 배치작업
-------------------------
-
-<br><br>
 
 elasticdump: 인덱스 데이터 마이그레이션
 ---------------------------------------
