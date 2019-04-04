@@ -63,6 +63,23 @@ $ tar -xzf elasticsearch-6.4.0.tar.gz
 
 -	rpm 설치 시, config 폴더 파일들은 **/etc/elasticsearch** 에 설치 됨
 
+<br>
+
+###### rpm설치 시, 기본 경로
+
+-	기본 프로그램 ($ES_HOME) : /usr/share/elasticsearch
+-	실행 파일 : bin/elasticsearch
+-	플러그인 : plugins
+-	설정 : /etc/elasticsearch
+	-	elasticsearch.yml
+	-	jvm.options
+	-	log4j2.properties
+-	데이터 (path.data) : /var/lib/elasticsearch
+-	로그 (path.logs) : /var/log/elasticsearch
+	-	(path.data, path.logs는 elasticsearch.yml에서 변경가능)
+
+<br><br>
+
 ### elasticsearch 실행
 
 ```shell
@@ -821,7 +838,7 @@ $ curl -XPOST -H 'Content-Type: application/json' http://{my_cluster_url}/_reind
 {
 	"source": {
 		"remote": {
-			"host": "http://otherhost:9200",
+			"host": "http://otherhost:9200"
 		},
 		"index": "twitter"
 	},
