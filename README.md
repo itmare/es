@@ -11,6 +11,18 @@ Elasticsearch 시작하기
 
 -	yum install java
 
+### hostname 영구 변경
+
+```shell
+#CentOS 6
+vi /etc/sysconfig/network
+HOSTNAME=myhost 
+
+#CentOS 7
+hostnamectl set-hostname myhost
+
+```
+
 ### elasticsearch 설치
 
 ##### 1. repo 등록 설치
