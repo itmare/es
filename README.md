@@ -16,7 +16,7 @@ Elasticsearch 시작하기
 ```shell
 #CentOS 6
 vi /etc/sysconfig/network
-HOSTNAME=myhost 
+HOSTNAME=myhost
 
 #CentOS 7
 hostnamectl set-hostname myhost
@@ -148,6 +148,12 @@ type=rpm-md
 yum install kibana
 ```
 
+-	tar
+
+```shell
+wget https://artifacts.elastic.co/downloads/kibana/kibana-6.4.0-linux-x86_64.tar.gz
+```
+
 ### kibana 시작
 
 ```shell
@@ -185,12 +191,12 @@ Elasticsearch 기본 동작
 # settings 로 인덱스 만들기
 PUT twitter
 {
-    "settings" : {
-        "index" : {
-            "number_of_shards" : 3,
-            "number_of_replicas" : 1
-        }
+  "settings" : {
+    "index" : {
+      "number_of_shards" : 3,
+      "number_of_replicas" : 1
     }
+  }
 }
 
 # index 삭제
@@ -225,31 +231,31 @@ _stats, _segments, _cat/indices, _cat/indices/{index_name}  ...
 # document ID 를 통해 document indexing
 PUT twitter/_doc/1
 {
-    "user" : "kimchy",
-    "post_date" : "2009-11-15T14:12:12",
-    "message" : "trying out Elasticsearch"
+  "user" : "kimchy",
+  "post_date" : "2009-11-15T14:12:12",
+  "message" : "trying out Elasticsearch"
 }
 
 # document id 가 없을 때만 indexing
 PUT twitter/_doc/1?op_type=create
 {
-    "user" : "kimchy",
-    "post_date" : "2009-11-15T14:12:12",
-    "message" : "trying out Elasticsearch"
+  "user" : "kimchy",
+  "post_date" : "2009-11-15T14:12:12",
+  "message" : "trying out Elasticsearch"
 }
 PUT twitter/_doc/1/_create
 {
-    "user" : "kimchy",
-    "post_date" : "2009-11-15T14:12:12",
-    "message" : "trying out Elasticsearch"
+  "user" : "kimchy",
+  "post_date" : "2009-11-15T14:12:12",
+  "message" : "trying out Elasticsearch"
 }
 
 # POST Method 를 통해 document ID 없이 indexing
 POST twitter/_doc
 {
-    "user" : "there",
-    "post_date" : "2009-11-15T14:12:12",
-    "message" : "trying out Elasticsearch"
+  "user" : "there",
+  "post_date" : "2009-11-15T14:12:12",
+  "message" : "trying out Elasticsearch"
 }
 
 # document ID 를 통해 document 조회
@@ -479,15 +485,15 @@ $ sudo vi /etc/elasticsearch/jvm.options
 $ sudo vi /etc/security/limits.conf
 
 # 다음 추가
-elasticsearch          soft    nofile          65536
-elasticsearch          hard    nofile          65536
+elasticsearch      soft  nofile      65536
+elasticsearch      hard  nofile      65536
 
 # limits.d/<숫자>-nproc.conf 열기
 $ sudo vi /etc/security/limits.d/20-nproc.conf
 
 # 다음 추가
-elasticsearch               soft    noproc          4096
-elasticsearch               hard    noproc          4096
+elasticsearch         soft  noproc      4096
+elasticsearch         hard  noproc      4096
 ```
 
 -	설정 추가/변경 후, 노드 한대씩 재시작
@@ -772,7 +778,7 @@ GET _cluster/allocation/explain
 #	- index.allocation.max_retries값에 의해 default로 5번만 추가 시도함
 #	- 5번 전부 실패하면 샤드 할당을 더 이상 하지 않는다.
 #	  ex) 대표적인 예로 디스크 볼륨이 부족한 경우, 5번 시도 후 샤드 할당 포기,
-#	      디스크 볼륨 정리하고 retry 시도
+#	    디스크 볼륨 정리하고 retry 시도
 POST _cluster/reroute
 POST _cluster/reroute?retry_failed
 ```
@@ -964,28 +970,28 @@ Elasticsearch 검색엔진 활용 및 성능 최적화와 모니터링
 # 애널라이저 확인
 POST _analyze
 {
-   "text": "Winter is coming!!!"
+  "text": "Winter is coming!!!"
 }
 
 # standard
 POST _analyze
 {
-    "analyzer": "standard",
-    "text": "Winter is coming!!!"
+  "analyzer": "standard",
+  "text": "Winter is coming!!!"
 }
 
 # whitespace
 POST _analyze
 {
-    "analyzer": "whitespace",
-    "text": "Winter is coming!!!"
+  "analyzer": "whitespace",
+  "text": "Winter is coming!!!"
 }
 
 # english
 POST _analyze
 {
-    "analyzer": "english",
-    "text": "Winter is coming!!!"
+  "analyzer": "english",
+  "text": "Winter is coming!!!"
 }
 ```
 
@@ -1068,56 +1074,56 @@ PUT bank/_settings
 // 정렬: 오름차순(asc), 내림차순(desc)
 GET bank/_search
 {
-    "sort": {
-        "age": "desc"
-    }
+  "sort": {
+    "age": "desc"
+  }
 }
 
 // 스코어가 계산되는 과정 확인
 GET bank/_search
 {
-    "explain": true,
-    "from":0, "size": 2,
-    "query" : {
-        "match" : { "address": "Fleet" }
-    }
+  "explain": true,
+  "from":0, "size": 2,
+  "query" : {
+    "match" : { "address": "Fleet" }
+  }
 }
 
 // _source 필터링
 // 관련 query에 대한 값만 리턴
 GET bank/_search
 {
-    "_source": false,
-    "sort": { "age": "desc" }
+  "_source": false,
+  "sort": { "age": "desc" }
 }
 // age와 gender만 리턴
 GET bank/_search
 {
-    "_source": [ "age","gender" ],
-    "sort": { "age": "desc" }
+  "_source": [ "age","gender" ],
+  "sort": { "age": "desc" }
 }
 // ge가 들어간 쿼리만 리턴
 GET bank/_search
 {
-    "_source": [ "*ge*" ],
-    "sort": { "age": "desc" }
+  "_source": [ "*ge*" ],
+  "sort": { "age": "desc" }
 }
 
 // highlight로 검색결과 하이라이팅 (리턴값에서 HTML의 <em> tag가 검색쿼리,"Fleet"를 wrap한다.)
 GET bank/_search
 {
-    "query": {
-          "match": {
-              "address": {
-                  "query": "Fleet"
-              }
-          }
-      },
-      "highlight": {
-          "fields": {
-              "address": {}
-          }
+  "query": {
+      "match": {
+        "address": {
+          "query": "Fleet"
+        }
       }
+    },
+    "highlight": {
+      "fields": {
+        "address": {}
+      }
+    }
 }
 ```
 
@@ -1134,23 +1140,23 @@ GET bank/_search
 // 쿼리값을 analyze하여 검색
 GET bank/_search
 {
-    "query": {
-         "match": { "address": "345 Fleet" }
-    }
+  "query": {
+     "match": { "address": "345 Fleet" }
+  }
 }// ==> address에 345와 Fleet가 포함된 모든 결과 리턴
 
 
 // boost로 검색, score에 가중치 적용 가능
 GET bank/_search
 {
-    "query": {
-        "match": {
-            "address": {
-                "query": "345 Fleet",
-                "boost": 2.0
-            }
-        }
+  "query": {
+    "match": {
+      "address": {
+        "query": "345 Fleet",
+        "boost": 2.0
+      }
     }
+  }
 }// ==> "score": 3.222,  boost값 2.0 적용시: 6.444
 
 
@@ -1158,9 +1164,9 @@ GET bank/_search
 // 쿼리 값을 analyze한 후, 해당 값으로 쿼리 구문 만들어 검색 (구문 검색)
 GET bank/_search
 {
-    "query": {
-         "match_phrase": { "address": "425 Fleet W" }
-    }
+  "query": {
+     "match_phrase": { "address": "425 Fleet W" }
+  }
 }// ==> address값이 "425 Fleet w"구문을 포함하는 결과값 리턴
 
 
@@ -1168,11 +1174,11 @@ GET bank/_search
 // 쿼리 값을 쿼리 구문만들어 검색, 마지막 문자를 와일드 카드로 검색
 GET bank/_search
 {
-    "query": {
-         "match_phrase_prefix": {
-             "address": "425 Fleet W"
-         }
-    }
+  "query": {
+     "match_phrase_prefix": {
+       "address": "425 Fleet W"
+     }
+  }
 }// ==> address값의 "425 Fleet W*"구문을 포함하는 결과값 리턴
 
 
@@ -1192,12 +1198,12 @@ POST multi_match_index/_doc
 // index에서 multi_match 사용
 GET multi_match_index/_search
 {
-    "query": {
-        "multi_match": {
-            "query": "ks",
-            "fields": [ "first", "comment"]
-        }
+  "query": {
+    "multi_match": {
+      "query": "ks",
+      "fields": [ "first", "comment"]
     }
+  }
 }// ==> first와 comment field의 값에 ks 포함된 결과값 리턴
 
 
@@ -1206,11 +1212,11 @@ GET multi_match_index/_search
 GET bank/_search
 {
    "query": {
-        "query_string" : {
-            "query" : "Walk Flee*",
-            "fields": [ "address", "employer"]
-        }
+    "query_string" : {
+      "query" : "Walk Flee*",
+      "fields": [ "address", "employer"]
     }
+  }
 } // ==> address와 employer 필드에 "Walk Flee*"를 포함한 결과값 리턴
 ```
 
@@ -1222,11 +1228,11 @@ GET bank/_search
 // keyword필드에 대해서만 쿼리 가능
 GET bank/_search
 {
-    "query": {
-        "term" : {
-            "gender.keyword": "M"
-        }
+  "query": {
+    "term" : {
+      "gender.keyword": "M"
     }
+  }
 } // ==> 성별이 "M"일때만 결과값 리턴
 
 
@@ -1234,11 +1240,11 @@ GET bank/_search
 // 여러개의 용어에 대해 검색 가능 or 검색과 유사한 기능
 GET bank/_search
 {
-    "query": {
-        "terms" : {
-          "gender.keyword": ["A","M"]
-        }
+  "query": {
+    "terms" : {
+      "gender.keyword": ["A","M"]
     }
+  }
 }
 
 // range Query
@@ -1246,14 +1252,14 @@ GET bank/_search
 // gte, gt, lte, lt 사용
 GET bank/_search
 {
-    "query": {
-        "range" : {
-            "age": {
-                "gte": 25,
-                "lte": 30
-            }
-        }
+  "query": {
+    "range" : {
+      "age": {
+        "gte": 25,
+        "lte": 30
+      }
     }
+  }
 }
 
 // wildcard Query
@@ -1261,9 +1267,9 @@ GET bank/_search
 // analyze가 안됨
 GET bank/_search
 {
-    "query": {
-        "wildcard" : { "lastname.keyword": "D*e" }
-    }
+  "query": {
+    "wildcard" : { "lastname.keyword": "D*e" }
+  }
 }
 ```
 
@@ -1276,26 +1282,26 @@ GET bank/_search
 // 문서에 일치하는 항목, 스코어 계산
 GET bank/_search
 {
-    "query": {
-        "bool": {
-            "must": [
-               { "match": { "address": { "query": "Fleet" }}}
-            ]
-        }
+  "query": {
+    "bool": {
+      "must": [
+         { "match": { "address": { "query": "Fleet" }}}
+      ]
     }
+  }
 }
 
 // filter
 // 문서에 일치하는 항목, 스코어 0, filter context 에서 실행
 GET bank/_search
 {
-    "query": {
-        "bool": {
-            "filter": [
-               { "match": { "address": { "query": "Fleet" }}}
-            ]
-        }
+  "query": {
+    "bool": {
+      "filter": [
+         { "match": { "address": { "query": "Fleet" }}}
+      ]
     }
+  }
 }
 
 // should
@@ -1303,42 +1309,42 @@ GET bank/_search
 // must나 filter항목이 없으면 적어도 하나의 쿼리절과 일치되는 결과 리턴
 GET bank/_search
 {
-    "query": {
-        "bool": {
-            "should": [
-                { "match": { "state": { "query": "MI", "boost": 2 }}},
-                { "term": { "gender.keyword": { "value": "M" }}}
-            ],
-            "minimum_should_match" : 1
-        }
+  "query": {
+    "bool": {
+      "should": [
+        { "match": { "state": { "query": "MI", "boost": 2 }}},
+        { "term": { "gender.keyword": { "value": "M" }}}
+      ],
+      "minimum_should_match" : 1
     }
+  }
 }
 
 // must_not
 // 문서에 일치하지 않는 항목, 스코어 1 세팅
 GET bank/_search
 {
-    "query": {
-        "bool": {
-            "must_not": [
-               { "match": { "address": { "query": "Fleet" }}}
-            ]
-        }
+  "query": {
+    "bool": {
+      "must_not": [
+         { "match": { "address": { "query": "Fleet" }}}
+      ]
     }
+  }
 }
 
 // bool all
 GET bank/_search
 {
-    "query": {
-        "bool": {
-            "must": [ { "term":  { "gender.keyword": "F" }}],
-            "filter": [ { "range": { "age": { "lte": "30" }}}],
-            "should": [ { "match": { "state": { "query": "MI" }}},
-                               { "match": { "city": { "query": "Nogal" }}}],
-            "must_not": [ { "match": { "address": "Hope" }}]
-       }
-    }
+  "query": {
+    "bool": {
+      "must": [ { "term":  { "gender.keyword": "F" }}],
+      "filter": [ { "range": { "age": { "lte": "30" }}}],
+      "should": [ { "match": { "state": { "query": "MI" }}},
+                 { "match": { "city": { "query": "Nogal" }}}],
+      "must_not": [ { "match": { "address": "Hope" }}]
+     }
+  }
 }
 ```
 
@@ -1441,20 +1447,20 @@ PUT date_index_format
 PUT numeric_index
 {
   "mappings": {
-    "_doc": {
-      "properties": {
-        "number_of_bytes": {
-          "type": "integer"
-        },
-        "time_in_seconds": {
-          "type": "float"
-        },
-        "price": {
-          "type": "scaled_float",
-          "scaling_factor": 100
-        }
-      }
+  "_doc": {
+    "properties": {
+    "number_of_bytes": {
+      "type": "integer"
+    },
+    "time_in_seconds": {
+      "type": "float"
+    },
+    "price": {
+      "type": "scaled_float",
+      "scaling_factor": 100
     }
+    }
+  }
   }
 }
 ```
@@ -2047,12 +2053,12 @@ python elasticsearch.py <OPTION> <ES_HOST:ES_PORT>
 
 example)---------------------------------------------------------------------------------------------------
 [jinwookchung@es01 ~] python es.py n es01:9200
-ip          heap.percent ram.percent cpu load_1m load_5m load_15m node.role master name
-10.142.0.12           25          86  13    0.08    0.05     0.05 di        -      itmare-hot02
-10.142.0.7             6          84   1    0.00    0.01     0.05 mi        *      itmare-master02
-10.142.0.6             5          88   3    0.02    0.04     0.05 mi        -      itmare-master01
-10.142.0.13           49          88   2    0.00    0.01     0.05 di        -      itmare-hot03
-10.142.0.11           27          85   9    0.03    0.03     0.05 di        -      itmare-hot01
+ip      heap.percent ram.percent cpu load_1m load_5m load_15m node.role master name
+10.142.0.12       25      86  13  0.08  0.05   0.05 di    -    itmare-hot02
+10.142.0.7       6      84   1  0.00  0.01   0.05 mi    *    itmare-master02
+10.142.0.6       5      88   3  0.02  0.04   0.05 mi    -    itmare-master01
+10.142.0.13       49      88   2  0.00  0.01   0.05 di    -    itmare-hot03
+10.142.0.11       27      85   9  0.03  0.03   0.05 di    -    itmare-hot01
 
 [jinwookchung@es01 ~]
 ```
