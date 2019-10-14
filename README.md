@@ -379,10 +379,13 @@ vi /etc/elasticsearch/elasticsearch.yml
 ```shell
 # 노드에 다른 노드가 연결할 수 있게 해준다. (ip, hostname가능)
 network.host: 0.0.0.0
+
 # 웹 브라우저에서 es에 접근 가능케 해주는 설정(head나 HQ플러그인 사용시 설정)
 http.cors.enabled: true
+
 # 웹 브라우저로 접근할 수 있는 IP ACL 설정
 http.cors.allow-origin: "*"
+
 # 클러스터의 다른 노드들이 다음의 노드들을 master로 인식하게 해준다.(ip, hostname가능)
 # 클러스터 이름을 전제로 설정된 호스트 가운데 master가 결정됨
 # master노드가 있으면 합류, 없으면 지정된 호스트 중 하나 master로 선출
@@ -390,6 +393,7 @@ discovery.zen.ping.unicast.hosts: [  "master01.com", "master02.com", "master03.c
 
 # cluster 이름 설정
 cluster.name: itmare-es
+
 # node 이름 설정
 node.name: itmare-master01
 ```
