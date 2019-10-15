@@ -875,13 +875,26 @@ $ curl -XPOST -H 'Content-Type: application/json' http://{my_cluster_url}/_reind
 ```json
 - 인덱스 문서의 인덱싱, 삭제, 업데이트를 벌크로 진행할 수 있는 API
 - java. python 등 언어별로 bulk api 라이브러리 제공
+- 7.x이상부터는 `"_type"` 필요없음, 이전 버전의 `type`명이 `_doc`이 아니라면 추가
+
+- 6.x 이하
 POST _bulk
 { "index" : { "_index" : "test", "_type" : "_doc", "_id" : "1" } }
 { "field1" : "value1" }
 { "delete" : { "_index" : "test", "_type" : "_doc", "_id" : "2" } }
 { "create" : { "_index" : "test", "_type" : "_doc", "_id" : "3" } }
 { "field1" : "value3" }
-{ "update" : {"_id" : "1", "_type" : "_doc", "_index" : "test"} }
+{ "update" : { "_index" : "test", "_type" : "_doc", "_id" : "1"} }
+{ "doc" : {"field2" : "value2"} }
+
+- 7.x 이상
+POST _bulk
+{ "index" : { "_index" : "test", "_id" : "1" } }
+{ "field1" : "value1" }
+{ "delete" : { "_index" : "test", "_id" : "2" } }
+{ "create" : { "_index" : "test", "_id" : "3" } }
+{ "field1" : "value3" }
+{ "update" : { "_index" : "test",  "_id" : "1"} }
 { "doc" : {"field2" : "value2"} }
 ```
 
