@@ -1070,6 +1070,58 @@ PUT myanalyze1
 }
 ```
 
+```shell
+# Example
+# 기본 구조 및 analyzer 설정/적용
+PUT blogs_new
+{
+  "settings": {
+    "number_of_replicas": 1,
+    "number_of_shards": 3,
+    "analysis": {
+      "char_filter": {
+
+      },
+      "tokenizer": {
+
+      },
+      "filter": {
+        "my_filter":{
+          "type": "stop",
+          "stopwords": ["calendar"]
+        }
+      },
+
+
+      # 생성한 "my_filter"를 custom analyzer("my_analyzer")에 적용
+      "analyzer": {
+        "my_analyzer":{
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "filter": ["lowercase", "my_filter", "snowball"]
+        }
+      }
+    }
+
+  },
+	# 생성한 "my_analyzer"를 사용할 필드에 매핑
+  "mappings" : {
+      "properties" : {
+        "title" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          },
+          "analyzer": "my_analyzer"
+        }
+      }
+    }
+}
+```
+
 <br>
 
 ### 쿼리 생성
