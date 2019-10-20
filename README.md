@@ -1071,7 +1071,7 @@ PUT myanalyze1
 ```
 
 ```shell
-# Example
+# Example: "title" filter에서 "canlendar"를 stopword를 지정 해보자
 # 기본 구조 및 analyzer 설정/적용
 PUT blogs_new
 {
@@ -1120,6 +1120,28 @@ PUT blogs_new
       }
     }
 }
+
+
+# 결과
+# 기존 blogs
+GET blogs/_search
+{
+  "query": {
+    "match": {
+      "title": "calendar"
+    }
+  }
+}  #===> value: 4
+
+# my_analyzer 적용한 blogs_new
+GET blogs_new/_search
+{
+  "query": {
+    "match": {
+      "title": "calendar"
+    }
+  }
+}  # ===> value: 0
 ```
 
 <br>
