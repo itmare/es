@@ -23,6 +23,62 @@ hostnamectl set-hostname myhost
 
 ```
 
+### repo 파일 등록
+
+-	elasticsearch 6.x
+
+```shell
+cd /etc/yum.repo.d/
+vi es6.repo
+
+#elasticsearch
+[elasticsearch-6.x]
+name=Elasticsearch repository for 6.x packages
+baseurl=https://artifacts.elastic.co/packages/6.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+
+#kibana
+[kibana-6.x]
+name=Kibana repository for 6.x packages
+baseurl=https://artifacts.elastic.co/packages/6.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+```
+
+-	elasticsearch 7.x
+
+```shell
+cd /etc/yum.repo.d/
+vi es7.repo
+
+# elasticsearch
+[elastic-7.x]
+name=Elastic repository for 7.x packages
+baseurl=https://artifacts.elastic.co/packages/7.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+
+# kibana
+[kibana-7.x]
+name=Kibana repository for 7.x packages
+baseurl=https://artifacts.elastic.co/packages/7.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+```
+
 ### elasticsearch 설치
 
 ##### 1. repo 등록 설치
